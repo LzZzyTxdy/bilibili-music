@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>B站音频抓取 · Lite</title>
+    <style>
+      :root{
+        /* 背景图路径：可改为远程链接或本地 static/bg.jpg */
+        --bg-img: url("static/bg.jpg");          /* 放到 static/bg.jpg */
+        --brand: #00a1d6;                 /* bilibili 蓝 */
+        --brand2:#ff7aa5;                 /* 点缀粉 */
+        --card-bg: rgba(255,255,255,.08); /* 玻璃卡片底色 */
+        --card-br: rgba(255,255,255,.18); /* 卡片边框 */
+        --text: #eaf6ff;                  /* 文字主色 */
+        --muted:#b6c6d6;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{
+        margin:0; color:var(--text); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+        background:
+          radial-gradient(1200px 800px at 80% -10%, rgba(255,122,165,.32), transparent 60%),
+          radial-gradient(1000px 700px at -10% 80%, rgba(0,161,214,.28), transparent 60%),
+          linear-gradient(180deg, #0b1220, #0b1220 40%, #0a0f1a);
+        overflow-x:hidden;
+      }
+
+      /* 背景图层 */
+      .bg{
+        position:fixed; inset:0;
+        background-image: var(--bg-img);
+        background-size: cover; background-position: center;
+        filter: saturate(1.05) contrast(1.02) brightness(.9) blur(1px);
+        opacity:.35;
+        z-index:-2;
+      }
+      /* 渐变遮罩，保证可读性 */
+      .veil{
+        position:fixed; inset:0;
+        background: radial-gradient(800px 500px at 60% 20%, rgba(11,18,32,.18), rgba(11,18,32,.6) 70%),
+                    linear-gradient(180deg, rgba(11,18,32,.4), rgba(11,18,32,.7));
+        z-index:-1;
+      }
+
+      .wrap{max-width:980px; margin:48px auto; padding:0 20px;}
+      .header{
+        display:flex; align-items:center; gap:14px; margin-bottom:22px;
+      }
+      .logo{
+        width:40px; height:40px; border-radius:10px;
+        background: conic-gradient(from 210deg, var(--brand), var(--brand2));
+        display:grid; place-items:center; box-shadow: 0 8px 30px rgba(0,161,214,.35);
+      }
+      .logo svg{opacity:.95}
+      .title{font-weight:800; font-size:22px; letter-spacing:.3px}
+      .subtitle{color:var(--muted); font-size:13px}
+
+      .card{
+        border:1px solid var(--card-br); background:var(--card-bg);
+        backdrop-filter: blur(12px) saturate(120%); -webkit-backdrop-filter: blur(12px) saturate(120%);
+        border-radius:16px; padding:18px; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+      }
+      .row{display:flex; flex-wrap:wrap; gap:10px; align-items:center}
+
+      .input{
+        flex:1 1 520px;
+        padding:12px 14px; border-radius:12px; outline:none; border:1px solid rgba(255,255,255,.18);
+        background: rgba(0,0,0,.25); color:var(--text);
+      }
+      .input::placeholder{color:#9fb3c7}
+      .btn{
+        appearance:none; border:none; cursor:pointer;
+        padding:12px 16px; border-radius:12px; font-weight:700; letter-spacing:.2px;
+        color:#0a1020; background: linear-gradient(135deg, #4fd6ff, #6ff);
+        box-shadow: 0 8px 22px rgba(79,214,255,.35), inset 0 0 0 1px rgba(255,255,255,.35);
+      }
+      .btn.secondary{
+        background: linear-gradient(135deg, #ffd1e2, #ffe1ec);
+        box-shadow: 0 8px 22px rgba(255,209,226,.28), inset 0 0 0 1px rgba(255,255,255,.35);
+      }
+
+      .panel{margin-top:16px; gap:10px}
+      .chip{
+        font-size:12px; padding:6px 10px; border-radius:999px;
+        border:1px solid rgba(255,255,255,.16); color:var(--muted); background: rgba(255,255,255,.06);
+      }
+      .res{
+        margin-top:18px; display:grid; gap:14px;
+      }
+      .vcard{
+        border:1px dashed rgba(255,255,255,.16); border-radius:14px; padding:12px 14px;
+        background: rgba(0,0,0,.25);
+      }
+      .vtitle{font-weight:700}
+      .alist{margin-top:8px; display:grid; gap:10px}
+      .aitem{
+        display:flex; align-items:center; justify-content:space-between; gap:12px;
+        padding:10px 12px; border-radius:12px; background: rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.14);
+      }
+      .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+      .badge{
+        font-size:12px; padding:4px 8px; border-radius:999px; background: rgba(0,161,214,.18); color:#aee9ff; border:1px solid rgba(0,161,214,.35);
+      }
+      .muted{color:var(--muted); font-size:12px}
+      .dl{
+        text-decoration:none; color:#0a1020; background: linear-gradient(135deg, #7df, #9ef);
+        padding:8px 12px; border-radius:10px; font-weight:700; letter-spacing:.2px; white-space:nowrap;
+        box-shadow: 0 6px 18px rgba(125,223,255,.28);
+      }
+
+      .footer{margin-top:24px; text-align:center; color:#90a4b8; font-size:12px}
+      @media (max-width:560px){
+        .title{font-size:20px}
+        .input{flex-basis:100%}
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg" aria-hidden="true"></div>
+    <div class="veil" aria-hidden="true"></div>
+
+    <div class="wrap">
+      <div class="header">
+        <div class="logo" aria-hidden="true">
+          <!-- 小电视轮廓 -->
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <rect x="3.5" y="6.5" width="17" height="12" rx="2.5" stroke="white" opacity="0.95"/>
+            <path d="M7 4l3 3M17 4l-3 3" stroke="white" opacity="0.95" stroke-linecap="round" />
+          </svg>
+        </div>
+        <div>
+          <div class="title">B站音频抓取 · Lite</div>
+          <div class="subtitle">输入 BV 号/链接 → 解析 DASH 音频 → 一键下载（.m4a/.webm）</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="row">
+          <input id="inp" class="input" placeholder="粘贴 B 站链接或 BV 号，例如：BV1xx411c7mD"/>
+          <button class="btn" onclick="go()">解析</button>
+          <button class="btn secondary" onclick="demo()">示例</button>
+        </div>
+
+        <div class="panel row">
+          <span class="chip">提示：高码率可能需登录（配置后端 SESSDATA）</span>
+          <label class="chip" style="cursor:pointer">
+            <input id="norange" type="checkbox" style="vertical-align:-2px;margin-right:6px"> 遇到失败时禁用断点
+          </label>
+        </div>
+
+        <div id="out" class="res"></div>
+      </div>
+
+      <div class="footer">仅用于学习与自用下载，遵守站点条款 · © your local dev</div>
+    </div>
+
+    <script>
+      async function go() {
+        const url = document.getElementById('inp').value.trim();
+        if(!url) return;
+        const out = document.getElementById('out');
+        out.innerHTML = `<div class="vcard">解析中…</div>`;
+        try {
+          const r = await fetch('/api/parse?url=' + encodeURIComponent(url));
+          const data = await r.json();
+          if(!r.ok) { out.innerHTML = cardMsg(data.error || '解析失败'); return; }
+
+          const parts = [];
+          parts.push(cardVideo(data.title, data.bvid));
+          (data.pages || []).forEach(pg => parts.push(cardPage(data, pg)));
+          out.innerHTML = parts.join('\n');
+        } catch (e) {
+          out.innerHTML = cardMsg('网络或服务异常：' + e);
+        }
+      }
+
+      function demo(){
+        document.getElementById('inp').value = 'https://www.bilibili.com/video/BV1ts411X7XQ';
+        go();
+      }
+
+      // ---- 组件 ----
+      function cardMsg(text){
+        return `<div class="vcard">${escapeHtml(text||'')}</div>`;
+      }
+      function cardVideo(title, bvid){
+        return `
+        <div class="vcard">
+          <div class="vtitle">${escapeHtml(title||'')}</div>
+          <div class="muted" style="margin-top:4px">BV：${escapeHtml(bvid||'')}</div>
+        </div>`;
+      }
+      function cardPage(data, pg){
+        const alist = (pg.audios||[]).map(a => renderAudioRow(data, pg, a)).join('');
+        return `
+          <div class="vcard">
+            <div class="vtitle">P${pg.p} · ${escapeHtml(pg.title||'')}</div>
+            <div class="alist">${alist || `<div class="muted">未找到音频</div>`}</div>
+          </div>
+        `;
+      }
+      function renderAudioRow(data, pg, a){
+        const kbps = a.bandwidth ? Math.round(a.bandwidth / 1000) : null;
+        const fname = suggestName(data.title, pg.p, kbps, a.mimeType, a.codecs);
+        const norange = document.getElementById('norange').checked ? '&norange=1' : '';
+        const proxy = a.proxy_url + (a.proxy_url.includes('?') ? '&' : '?') + 'name=' + encodeURIComponent(fname) + norange;
+        const isHe = /40\.5|he\-aac|sbr/i.test(a.codecs||'');
+        return `
+          <div class="aitem">
+            <div class="meta">
+              <span class="badge">${badgeCodec(a)}</span>
+              <span class="muted">${escapeHtml(a.mimeType || '')} · ${escapeHtml(a.codecs || '')}</span>
+              <span class="muted">≈ ${kbps ?? '?'} kbps</span>
+              ${isHe ? `<span class="badge" style="background:rgba(255,122,165,.18);color:#ffd1e2;border-color:rgba(255,122,165,.35)">低码率优化</span>`:''}
+            </div>
+            <a class="dl" href="${proxy}" download="${escapeHtml(fname)}">下载</a>
+          </div>
+        `;
+      }
+      function badgeCodec(a){
+        const c = (a.codecs||'').toLowerCase();
+        if (c.includes('opus')) return 'Opus / WebM';
+        if (c.includes('mp4a.40.5')) return 'HE-AAC v1';
+        if (c.includes('mp4a.40.2')) return 'AAC-LC';
+        return 'Audio';
+      }
+
+      // ---- 辅助 ----
+      function escapeHtml(s){
+        return (s || '').replace(/[&<>"']/g, m => (
+          {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]
+        ));
+      }
+      function pickExt(mimeType, codecs) {
+        const mt = (mimeType || '').toLowerCase();
+        const cd = (codecs || '').toLowerCase();
+        if (mt.includes('webm') || cd.includes('opus')) return 'webm';
+        if (mt.includes('mp4') || cd.includes('mp4a')) return 'm4a';
+        if (mt.includes('mp3') || cd.includes('mp3')) return 'mp3';
+        return 'm4a';
+      }
+      function suggestName(videoTitle, p, kbps, mimeType, codecs) {
+        const safeTitle = (videoTitle || 'bilibili').replace(/[\\/:*?"<>|]/g, '_').slice(0, 80);
+        const rate = kbps ? `${kbps}kbps` : 'audio';
+        const ext = pickExt(mimeType, codecs);
+        return `${safeTitle}_P${p}_${rate}.${ext}`;
+      }
+    </script>
+  </body>
+</html>

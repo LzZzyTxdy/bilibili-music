@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# venv
+.venv/
+venv/
+env/
+
+# 编辑器
+.vscode/
+.idea/
+
+# 依赖缓存
+*.log
+
+# 其他
+.DS_Store
