@@ -2,8 +2,8 @@
 
 > 一个用 Flask + 原生 HTML/JS 写的小工具：解析 B 站视频的 DASH 音频流，提供一键下载音频文件的网页界面。
 
-在线示例（云服务器2025-11-11过期）：  
-https://bilibili-music.top/
+在线示例（当前部署的云服务器2025-11-11过期）：  
+<https://bilibili-music.top/>
 
 ---
 
@@ -39,8 +39,8 @@ https://bilibili-music.top/
 ### 1. 克隆代码
 
 ```bash
-git clone https://github.com/<你的用户名>/<你的仓库名>.git
-cd <你的仓库名>
+git clone https://github.com/LzZzyTxdy/bilibili-music.git
+cd bilibili-music
 ```
 
 ### 2. 创建虚拟环境并安装依赖
@@ -50,12 +50,14 @@ cd <你的仓库名>
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate   # Windows 下用 .venv\Scripts\activate
-
+```
+```bash
 pip install -r requirements.txt
 ```
+
 ### 3. 运行开发服务器
 ```bash
 python app.py
 ```
-默认监听在：http://127.0.0.1:5173/
+默认监听在：<http://127.0.0.1:5173/>
 浏览器打开这个地址即可访问页面。
