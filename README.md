@@ -1,8 +1,8 @@
 # Bilibili Music Downloader
 
-> 一个用 Flask + 原生 HTML/JS 写的小工具：解析 B 站视频的 DASH 音频流，提供一键下载音频文件的网页界面。仅用于学习、个人自用，**不要商用或大规模分发**。
+> 一个用 Flask + 原生 HTML/JS 写的小工具：解析 B 站视频的 DASH 音频流，提供一键下载音频文件的网页界面。
 
-在线示例（如果你有在跑）：  
+在线示例（云服务器2025-11-11过期）：  
 https://bilibili-music.top/
 
 ---
@@ -34,7 +34,7 @@ https://bilibili-music.top/
 
 ---
 
-## 本地运行（开发）
+## 本地运行
 
 ### 1. 克隆代码
 
